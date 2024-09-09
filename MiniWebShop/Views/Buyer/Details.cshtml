@@ -1,0 +1,195 @@
+﻿@model MiniWebShop.Shared.Models.ViewModel.ProductModels.ProductCategoryViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<div class="row">
+    <div class="col-4">
+        <h4>Details</h4>
+        <hr />
+        <dl class="row">
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.CategoryName)
+            </dd>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Description)
+            </dd>
+        </dl>
+    </div>
+    <div class="col-8">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Choose</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var item in Model.ProductItems)
+                {
+                    <tr>
+                        <th scope="row">@item.Id</th>
+                        <td>@item.Name</td>
+                        <td>@item.Description</td>
+                        <td>@item.Price</td>
+                        <td>@item.Quantity</td>
+                        <td>
+                            <input type="button"
+                                   class="btn btn-primary"
+                                   att-id="@item.Id"
+                                   att-product-name="@item.Name"
+                                   att-product-description="@item.Description"
+                                   att-product-price="@item.Price"
+                                   att-product-quantity="@item.Quantity"
+                                   onclick="AddItemToShoppingCart(this)"
+                                   value="Choose" />
+                        </td>
+                    </tr>
+                }
+
+
+
+            </tbody>
+        </table>
+    </div>
+    <input type="button" class="btn btn-success" value="Add to Cart" id="btn-order-final" />
+
+</div>
+
+<div class="modal fade" id="order-modal" tabindex="-1" role="dialog" aria-labelledby="orderModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderModalLabel">Order details</h5>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="product-name" class="col-form-label">ProductName:</label>
+                        <input type="text" class="form-control" id="product-name" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-description" class="col-form-label">Description:</label>
+                        <textarea class="form-control" id="product-description" readonly></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-price" class="col-form-label">Price:</label>
+                        <input type="text" class="form-control" id="product-price" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-quantity" class="col-form-label">Available Quantity:</label>
+                        <input type="text" class="form-control" id="product-quantity" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="order-quantity" class="col-form-label">Order Quantity:</label>
+                        <input type="number" class="form-control" id="order-quantity" min="1">
+                        <div class="invalid-feedback">The order quantity cannot be greater than the available quantity!</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="CloseModal()" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="ConfirmOrder()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentButton; 
+    const orderItems = {}; 
+
+    function AddItemToShoppingCart(e) {
+        currentButton = e;
+
+        var productName = e.getAttribute("att-product-name");
+        var productDescription = e.getAttribute("att-product-description");
+        var productPrice = e.getAttribute("att-product-price");
+        var productQuantity = e.getAttribute("att-product-quantity");
+
+
+        document.getElementById("product-name").value = productName;
+        document.getElementById("product-description").value = productDescription;
+        document.getElementById("product-price").value = productPrice;
+        document.getElementById("product-quantity").value = productQuantity;
+        document.getElementById("order-quantity").value = 1;  
+
+        $('#order-modal').modal('show');
+
+    }
+
+    function CloseModal() {
+        $('#order-modal').modal('hide');
+    }
+
+
+    function ConfirmOrder() {
+        var orderQuantity = parseInt(document.getElementById("order-quantity").value);
+        var productQuantity = parseInt(document.getElementById("product-quantity").value);
+        var productId = currentButton.getAttribute("att-id");
+
+        if (orderQuantity > productQuantity) {
+            document.getElementById("order-quantity").classList.add("is-invalid");
+            return;
+        }
+        else {
+            document.getElementById("order-quantity").classList.remove("is-invalid");
+
+            if (currentButton) {
+                currentButton.className = 'btn btn-success';
+                currentButton.value = 'Odabrano: ' + orderQuantity;
+            }
+            orderItems[productId] = orderQuantity;
+            CloseModal();
+        }
+
+
+    }
+
+    document.getElementById("btn-order-final").addEventListener("click", function () {
+  
+        let orderItemsArray = [];
+
+        for (const [productId, quantity] of Object.entries(orderItems)) {
+            orderItemsArray.push({
+                ProductItemId: productId,
+                Quantity: quantity
+            });
+        }
+
+        
+        fetch('/Buyer/AddToOrderItem', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderItemsArray)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    alert('Network response was not ok');
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success:', data);
+                window.location.href = '/Buyer/Order';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
+
+    });
+
+
+
+
+</script>

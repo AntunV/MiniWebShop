@@ -1,0 +1,110 @@
+﻿@using MiniWebShop.Services.Interfaces
+@model MiniWebShop.Shared.Models.ViewModel.OrderModels.OrderViewModel
+@inject IProductService ProductService;
+
+
+@{
+    ViewData["Title"] = "MyOrder";
+    var productItems = await ProductService.GetProductItems(Model.OrderItems.Select(y => y.ProductItemId.GetValueOrDefault()).ToList());
+    var rowCounter = 1;
+}
+
+
+<div>
+    <h4>Detalji narudžbe</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Id)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Id)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Buyer.FirstName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Buyer.FirstName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Buyer.LastName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Buyer.LastName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Created)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Created)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Total)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Total)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Message)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Message)
+        </dd>
+
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.OrderAddress.Country)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.OrderAddress.Country)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.OrderAddress.City)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.OrderAddress.City)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.OrderAddress.Street)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.OrderAddress.Street)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.OrderAddress.Number)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.OrderAddress.Number)
+        </dd>
+    </dl>
+</div>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Quantity</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.OrderItems.Count; i++)
+        {
+            var productItem = productItems.FirstOrDefault(x => x.Id == Model.OrderItems[i].ProductItemId);
+            <tr>
+                <td>
+                    @rowCounter
+                </td>
+                <td>
+                    @productItem.Name
+                </td>
+                <td>
+                    @Model.OrderItems[@i].Quantity
+                </td>
+            </tr>
+
+            rowCounter++;
+        }
+        <div>
+            <a asp-action="Orders">Back to Orders</a>
+        </div>
+    </tbody>
+</table>

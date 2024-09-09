@@ -1,0 +1,106 @@
+﻿@using MiniWebShop.Services.Interfaces
+@inject IProductService ProductService;
+
+@model MiniWebShop.Shared.Models.Binding.OrderModels.OrderBinding
+
+@{
+
+    var productItems = await ProductService.GetProductItems(Model.OrderItems.Select(y => y.ProductItemId.GetValueOrDefault()).ToList());
+    var rowCounter = 1;
+
+    ViewData["Title"] = "Order";
+}
+
+<h1>Cart</h1>
+
+@if (Model.OrderItems.Count == 0)
+{
+    <span class="alert-info">Your cart is empty, choose one of our</span>
+    <br />
+    <a class="btn btn-outline-success mt-3 mb-5" asp-area="" asp-controller="Buyer" asp-action="Index">products!</a>
+}
+
+else
+{
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="Order">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <h4>User's address </h4>
+
+                <div class="form-group">
+                    <label asp-for="OrderAddress.Street" class="control-label"></label>
+                    <input asp-for="OrderAddress.Street" class="form-control" />
+                    <span asp-validation-for="OrderAddress.Street" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="OrderAddress.Number" class="control-label"></label>
+                    <input asp-for="OrderAddress.Number" class="form-control" />
+                    <span asp-validation-for="OrderAddress.Number" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="OrderAddress.City" class="control-label"></label>
+                    <input asp-for="OrderAddress.City" class="form-control" />
+                    <span asp-validation-for="OrderAddress.City" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="OrderAddress.Country" class="control-label"></label>
+                    <input asp-for="OrderAddress.Country" class="form-control" />
+                    <span asp-validation-for="OrderAddress.Country" class="text-danger"></span>
+                </div>
+
+
+                <h4>Additionally</h4>
+                <div class="form-group">
+                    <label asp-for="Message" class="control-label"></label>
+                    <input asp-for="Message" class="form-control" />
+                    <span asp-validation-for="Message" class="text-danger"></span>
+                </div>
+
+
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.OrderItems.Count; i++)
+                        {
+                            var productItem = productItems.FirstOrDefault(x => x.Id == Model.OrderItems[i].ProductItemId);
+                            <tr>
+                                <td>
+                                    @rowCounter
+                                </td>
+                                <td>
+                                    @productItem.Name
+                                </td>
+                                <td>
+                                    <input type="text" name="OrderItems[@i].Quantity" value="@Model.OrderItems[@i].Quantity" min="1" class="form-control" />
+                                    <input type="hidden" name="OrderItems[@i].ProductItemId" value="@Model.OrderItems[@i].ProductItemId" />
+
+                                </td>
+                            </tr>
+
+                            rowCounter++;
+                        }
+
+                    </tbody>
+                </table>
+                <div class="form-group">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+}
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

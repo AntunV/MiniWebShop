@@ -1,0 +1,69 @@
+﻿@model MiniWebShop.Shared.Models.ViewModel.ProductModels.ProductCategoryViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<div class="row">
+    <div class="col-4">
+        <h4>Details</h4>
+        <hr />
+        <dl class="row">
+            <dd class="col-sm-12">
+                @Html.DisplayFor(model => model.CategoryName)
+            </dd>
+            <dd class="col-sm-12">
+                @Html.DisplayFor(model => model.Description)
+            </dd>
+        </dl>
+        <div>
+            <a asp-action="Index">Back to List</a>
+        </div>
+    </div>
+    <div class="col-8">
+
+
+        @Html.ActionLink("Add new productitem", "AddProductItem", new { categoryId = Model.Id })
+
+
+
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Quantity</</th>
+                    <th scope="col">Update</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var item in Model.ProductItems)
+                {
+                    <tr>
+                        <th scope="row">@item.Id</th>
+                        <td>@item.Name</td>
+                        <td>@item.Description</td>
+                        <td>@item.Price</td>
+                        <td>@item.Quantity</td>
+                        <td>
+                            @Html.ActionLink("Edit", "EditProductItem", new { id = item.Id }) |
+                            @Html.ActionLink("Delete", "DeleteProductItem", new { id = item.Id })
+                        </td>
+                    </tr>
+                }
+
+
+
+            </tbody>
+        </table>
+
+
+
+
+    </div>
+
+</div>
